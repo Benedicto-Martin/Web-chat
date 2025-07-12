@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Web Chat - Grup</title>
+  <script src="/socket.io/socket.io.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+    }
+    #messages {
+      width: 300px;
+      margin: 0 auto;
+      border: 1px solid #ddd;
+      padding: 10px;
+      height: 200px;
+      overflow-y: scroll;
+    }
+    #form {
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Web Chat - Grup</h2>
+
+  <label for="groupSelect">Pilih Grup:</label>
+  <select id="groupSelect">
+    <option value="umum">Umum</option>
+    <option value="teknologi">Teknologi</option>
+    <option value="hiburan">Hiburan</option>
+  </select>
+  <button onclick="joinGroup()">Gabung</button>
+
+  <h3>Daftar Anggota Grup</h3>
+  <ul id="groupUsers"></ul>
+
+  <div id="chatBox" style="display: none;">
+    <h2>Chat Grup</h2>
+    <div id="messages"></div>
+    <form id="form">
+      <input id="message" type="text" autocomplete="off" required />
+      <button type="submit">Kirim</button>
+    </form>
+    <a href="/logout">Logout</a>
+  </div>
+
+  <script>
+    const socket = io({
+      auth: { username: localStorage.getItem("username") }
+    });
+
+    function joinGroup() {
+      const group = document.getElementById("groupSelect").value;
+      socket.emit("join group", group);
+      document.getElementById("chatBox").style.display = "block";
+    }
+
+    socket.on("group users", function(users) {
+      const userList = users.map(user => `<li>${user}</li>`).join("");
+      document.getElementById("groupUsers").innerHTML = userList;
+    });
+
+    document.getElementById("form").addEventListener("submit", function(event) {
+      event.preventDefault();
+      const message = document.getElementById("message").value;
+      const group = document.getElementById("groupSelect").value;
+      socket.emit("send message", { group, message });
+      document.getElementById("message").value = "";
+    });
+
+    socket.on("chat message", function(msg) {
+      const item = document.createElement("p");
+      item.innerHTML = msg;
+      document.getElementById("messages").appendChild(item);
+    });
+  </script>
+
+</body>
+</html>
