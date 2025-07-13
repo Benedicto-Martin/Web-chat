@@ -10,6 +10,7 @@
       font-family: Arial, sans-serif;
       text-align: center;
     }
+
     #messages {
       width: 300px;
       margin: 0 auto;
@@ -18,6 +19,7 @@
       height: 200px;
       overflow-y: scroll;
     }
+
     #form {
       margin-top: 10px;
     }
@@ -25,21 +27,19 @@
 </head>
 <body>
 
+  <!-- Login Section -->
   <section id="loginSection">
-
     <h2>Login ke Web Chat</h2>
-  
     <form action="/login" method="post" id="loginForm">
-      <input type="text" id="username" name="username" placeholder="Masukkan Nama...">
+      <input type="text" id="username" name="username" placeholder="Masukkan Nama..." required>
       <button type="submit">Login</button>
     </form>
-
   </section>
 
+  <!-- Chat Section -->
   <section id="chatSection" style="display: none;">
-
     <h2>Web Chat - Grup</h2>
-  
+
     <label for="groupSelect">Pilih Grup:</label>
     <select id="groupSelect">
       <option value="umum">Umum</option>
@@ -47,10 +47,10 @@
       <option value="hiburan">Hiburan</option>
     </select>
     <button onclick="joinGroup()">Gabung</button>
-  
+
     <h3>Daftar Anggota Grup</h3>
     <ul id="groupUsers"></ul>
-  
+
     <div id="chatBox" style="display: none;">
       <h2>Chat Grup</h2>
       <div id="messages"></div>
@@ -60,17 +60,20 @@
       </form>
       <a href="/logout" onclick="localStorage.removeItem('username')">Logout</a>
     </div>
-
   </section>
-  
-
 
   <script>
-
-    document.getElementById("loginForm").addEventListener("submit", function(event) {
+    // Simpan username ke localStorage saat login
+    document.getElementById("loginForm").addEventListener("submit", function (event) {
       const username = document.getElementById("username").value;
       localStorage.setItem("username", username);
-    })
+    });
+
+    // Cek apakah user sudah login
+    if (localStorage.getItem("username")) {
+      document.getElementById("loginSection").style.display = "none";
+      document.getElementById("chatSection").style.display = "block";
+    }
 
     const socket = io({
       auth: { username: localStorage.getItem("username") }
@@ -82,12 +85,12 @@
       document.getElementById("chatBox").style.display = "block";
     }
 
-    socket.on("group users", function(users) {
+    socket.on("group users", function (users) {
       const userList = users.map(user => `<li>${user}</li>`).join("");
       document.getElementById("groupUsers").innerHTML = userList;
     });
 
-    document.getElementById("form").addEventListener("submit", function(event) {
+    document.getElementById("form").addEventListener("submit", function (event) {
       event.preventDefault();
       const message = document.getElementById("message").value;
       const group = document.getElementById("groupSelect").value;
@@ -95,17 +98,11 @@
       document.getElementById("message").value = "";
     });
 
-    socket.on("chat message", function(msg) {
+    socket.on("chat message", function (msg) {
       const item = document.createElement("p");
       item.innerHTML = msg;
       document.getElementById("messages").appendChild(item);
     });
-
-    if (localStorage.getItem("username")) {
-      document.getElementById("loginSection").style.display = "none";
-      document.getElementById("chatSection").style.display = "block";
-    };
-
   </script>
 
 </body>
