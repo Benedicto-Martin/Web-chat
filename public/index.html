@@ -25,30 +25,53 @@
 </head>
 <body>
 
-  <h2>Web Chat - Grup</h2>
+  <section id="loginSection">
 
-  <label for="groupSelect">Pilih Grup:</label>
-  <select id="groupSelect">
-    <option value="umum">Umum</option>
-    <option value="teknologi">Teknologi</option>
-    <option value="hiburan">Hiburan</option>
-  </select>
-  <button onclick="joinGroup()">Gabung</button>
-
-  <h3>Daftar Anggota Grup</h3>
-  <ul id="groupUsers"></ul>
-
-  <div id="chatBox" style="display: none;">
-    <h2>Chat Grup</h2>
-    <div id="messages"></div>
-    <form id="form">
-      <input id="message" type="text" autocomplete="off" required />
-      <button type="submit">Kirim</button>
+    <h2>Login ke Web Chat</h2>
+  
+    <form action="/login" method="post" id="loginForm">
+      <input type="text" id="username" name="username" placeholder="Masukkan Nama...">
+      <button type="submit">Login</button>
     </form>
-    <a href="/logout">Logout</a>
-  </div>
+
+  </section>
+
+  <section id="chatSection" style="display: none;">
+
+    <h2>Web Chat - Grup</h2>
+  
+    <label for="groupSelect">Pilih Grup:</label>
+    <select id="groupSelect">
+      <option value="umum">Umum</option>
+      <option value="teknologi">Teknologi</option>
+      <option value="hiburan">Hiburan</option>
+    </select>
+    <button onclick="joinGroup()">Gabung</button>
+  
+    <h3>Daftar Anggota Grup</h3>
+    <ul id="groupUsers"></ul>
+  
+    <div id="chatBox" style="display: none;">
+      <h2>Chat Grup</h2>
+      <div id="messages"></div>
+      <form id="form">
+        <input id="message" type="text" autocomplete="off" required />
+        <button type="submit">Kirim</button>
+      </form>
+      <a href="/logout" onclick="localStorage.removeItem('username')">Logout</a>
+    </div>
+
+  </section>
+  
+
 
   <script>
+
+    document.getElementById("loginForm").addEventListener("submit", function(event) {
+      const username = document.getElementById("username").value;
+      localStorage.setItem("username", username);
+    })
+
     const socket = io({
       auth: { username: localStorage.getItem("username") }
     });
@@ -77,6 +100,12 @@
       item.innerHTML = msg;
       document.getElementById("messages").appendChild(item);
     });
+
+    if (localStorage.getItem("username")) {
+      document.getElementById("loginSection").style.display = "none";
+      document.getElementById("chatSection").style.display = "block";
+    };
+
   </script>
 
 </body>
